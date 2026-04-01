@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  clerkUserId   String        @unique
+  email         String        @unique
+  name          String?
+  avatarUrl     String?
+  bio           String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  memberships   GroupMember[]
+  createdGroups Group[]       @relation("GroupCreator")
+  
+  @@index([clerkUserId])
+  @@index([email])
+}
+
+model Group {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  imageUrl    String?
+  isPublic    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  creatorId   String
+  creator     User          @relation("GroupCreator", fields: [creatorId], references: [id])
+  
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  
+  latitude    Float
+  longitude   Float
+  address     String?
+  
+  members     GroupMember[]
+  
+  @@index([slug])
+  @@index([categoryId])
+  @@index([latitude, longitude])
+}
+
+model GroupMember {
+  id        String        @id @default(cuid())
+  role      MemberRole    @default(MEMBER)
+  joinedAt  DateTime      @default(now())
+  
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  groupId   String
+  group     Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, groupId])
+  @@index([userId])
+  @@index([groupId])
+}
+
+enum MemberRole {
+  MEMBER
+  ADMIN
+  OWNER
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  createdAt   DateTime @default(now())
+  
+  groups      Group[]
+  
+  @@index([slug])
+}
