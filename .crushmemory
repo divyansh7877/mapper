@@ -1,0 +1,45 @@
+# Mapper - Map-Based Groups & Clubs Social Website
+
+## Tech Stack
+- **Frontend**: Next.js 14+ (App Router), TypeScript, Tailwind CSS, shadcn/ui
+- **Maps**: MapCN (@mapcn/map) - built on MapLibre GL JS
+- **Auth**: Clerk (authentication)
+- **Database**: PostgreSQL with Prisma 7 ORM + pg adapter
+
+## Key Files
+- `prisma/schema.prisma` - Database schema
+- `src/app/explore/` - Main explore page with map view
+- `src/app/create/` - Create group page
+- `src/components/group-map.tsx` - Map component
+- `src/components/group-card.tsx` - Group card component
+- `src/components/location-picker.tsx` - Location picker for creating groups
+- `src/lib/geo.ts` - Geo utilities for distance calculations
+
+## Database Schema
+- **User** - Clerk user ID, email, profile info
+- **Group** - Name, slug, description, category, lat/lng coordinates
+- **GroupMember** - User-to-Group join with roles (MEMBER/ADMIN/OWNER)
+- **Category** - Group categories with colors
+
+## Setup
+1. Copy `.env.example` to `.env` and fill in:
+   - `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from clerk.com
+   - `DATABASE_URL` for PostgreSQL
+
+2. Install dependencies: `npm install`
+
+3. Push schema: `npx prisma db push`
+
+4. Seed categories: `npx tsx prisma/seed.ts`
+
+5. Run dev server: `npm run dev`
+
+## Graph Database?
+**No** - PostgreSQL with lat/lng columns handles this perfectly. The "search by location" is a bounding box query, not complex relationship traversal. A graph DB would only add complexity without benefit for this use case.
+
+## Features
+- Browse groups on interactive map (MapCN)
+- Filter by category and search radius
+- Search groups by name
+- Create groups with location picker
+- Join/leave groups (auth required)
